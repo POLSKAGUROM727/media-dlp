@@ -152,59 +152,132 @@
   .btn-primary:active { transform: translateY(0); }
   .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
 
-  #progress-section { margin-top: 28px; display: none; animation: fadeUp 0.3s ease both; }
-
-  .info-bar {
-    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
-    padding: 14px 16px; margin-bottom: 16px; font-size: 13px; color: var(--muted); display: none;
+  /* ── Queue ────────────────────────────────────────────────────────────────── */
+  #queue-section {
+    width: 100%; max-width: 680px;
+    margin-bottom: 24px;
+    display: none;
+    animation: fadeUp 0.4s ease both;
   }
-  .info-bar strong { color: var(--text); font-weight: 500; }
 
-  .status-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  #status-text { font-family: var(--mono); font-size: 12px; color: var(--text); letter-spacing: 0.05em; }
-  #speed-text { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .queue-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .queue-title {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
+    color: var(--muted); text-transform: uppercase;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .queue-badge {
+    background: rgba(255,60,60,0.15); color: var(--accent);
+    font-family: var(--mono); font-size: 10px; padding: 2px 7px;
+    border-radius: 4px; min-width: 20px; text-align: center;
+  }
+  .queue-clear {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+    color: var(--muted); text-transform: uppercase; background: none;
+    border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .queue-clear:hover { color: var(--text); border-color: var(--muted); }
 
-  .track { height: 5px; background: var(--surface2); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
-  .bar {
+  .queue-list { display: flex; flex-direction: column; gap: 10px; }
+
+  /* Individual job card */
+  .job-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px; position: relative; overflow: hidden;
+    animation: fadeUp 0.3s ease both;
+    transition: border-color 0.3s, opacity 0.2s, max-height 0.3s, padding 0.3s;
+  }
+  .job-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .job-card.active::before { opacity: 1; }
+  .job-card.done { border-color: rgba(60,255,160,0.25); }
+  .job-card.done::before { background: linear-gradient(90deg, var(--success), #3cd4ff); opacity: 1; }
+  .job-card.errored { border-color: rgba(255,60,60,0.3); }
+  .job-card.errored::before { background: var(--accent); opacity: 0.6; }
+
+  .job-top {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    margin-bottom: 10px;
+  }
+  .job-meta { flex: 1; min-width: 0; }
+  .job-url {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-bottom: 3px;
+  }
+  .job-title {
+    font-size: 13px; font-weight: 500; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .job-title.placeholder { color: var(--muted); font-style: italic; }
+
+  .job-badge {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+    padding: 3px 8px; border-radius: 4px; white-space: nowrap; flex-shrink: 0;
+    text-transform: uppercase;
+  }
+  .badge-active  { background: rgba(255,60,60,0.12); color: var(--accent); }
+  .badge-done    { background: rgba(60,255,160,0.1); color: var(--success); }
+  .badge-error   { background: rgba(255,60,60,0.12); color: var(--accent); }
+
+  .job-progress { margin-bottom: 8px; }
+  .job-status-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .job-status { font-family: var(--mono); font-size: 11px; color: var(--text); }
+  .job-speed  { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+
+  .job-track { height: 4px; background: var(--surface2); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
+  .job-bar {
     height: 100%; width: 0%; border-radius: 99px;
     background: linear-gradient(90deg, var(--accent), var(--accent2));
-    transition: width 0.4s ease; position: relative;
+    transition: width 0.4s ease;
   }
-  .bar::after {
-    content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 20px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
-    animation: shimmer 1.5s infinite;
+  .job-card.done .job-bar {
+    background: linear-gradient(90deg, var(--success), #3cd4ff);
   }
-  @keyframes shimmer { 0%{opacity:1} 50%{opacity:0.3} 100%{opacity:1} }
-  #percent-text { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: right; margin-top: 6px; }
+  .job-pct { font-family: var(--mono); font-size: 10px; color: var(--muted); text-align: right; margin-top: 4px; }
 
-  .dl-ready {
-    display: none; margin-top: 16px;
-    background: rgba(60,255,160,0.08); border: 1px solid rgba(60,255,160,0.3);
-    border-radius: 10px; padding: 16px; text-align: center;
-    animation: fadeUp 0.3s ease both;
+  .job-info-bar {
+    font-size: 12px; color: var(--muted); margin-bottom: 8px; display: none;
   }
-  .dl-ready p { font-size: 13px; color: var(--success); margin-bottom: 14px; font-family: var(--mono); }
-  .btn-dl {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--success); color: #0a0a0b; border: none; border-radius: 8px;
-    font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
-    text-transform: uppercase; padding: 13px 28px; cursor: pointer; text-decoration: none;
+  .job-info-bar strong { color: var(--text); font-weight: 500; }
+
+  .job-actions { margin-top: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  .btn-dl-sm {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--success); color: #0a0a0b; border: none; border-radius: 7px;
+    font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 10px 18px; cursor: pointer; text-decoration: none;
     transition: all 0.18s;
   }
-  .btn-dl:hover { background: #5affb8; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(60,255,160,0.25); }
+  .btn-dl-sm:hover { background: #5affb8; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(60,255,160,0.25); }
 
-  .done-banner {
-    background: rgba(60,255,160,0.08); border: 1px solid rgba(60,255,160,0.25); border-radius: 8px;
-    padding: 14px 16px; margin-top: 16px; font-family: var(--mono); font-size: 12px;
-    color: var(--success); display: none; animation: fadeUp 0.3s ease both;
+  .job-dismiss {
+    font-family: var(--mono); font-size: 10px; color: var(--muted);
+    background: none; border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 12px; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase;
+    transition: all 0.15s;
   }
-  .error-banner {
-    background: rgba(255,60,60,0.08); border: 1px solid rgba(255,60,60,0.25); border-radius: 8px;
-    padding: 14px 16px; margin-top: 16px; font-family: var(--mono); font-size: 12px;
-    color: var(--accent); display: none; animation: fadeUp 0.3s ease both; word-break: break-all;
+  .job-dismiss:hover { color: var(--text); border-color: var(--muted); }
+
+  .job-error-msg {
+    font-family: var(--mono); font-size: 11px; color: var(--accent);
+    background: rgba(255,60,60,0.06); border: 1px solid rgba(255,60,60,0.2);
+    border-radius: 6px; padding: 10px 12px; margin-top: 8px;
+    word-break: break-all;
   }
 
+  /* ── Modal ── */
   .modal-backdrop {
     display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
     z-index: 100; align-items: center; justify-content: center;
@@ -263,10 +336,8 @@
   }
   .sites-chevron { color: var(--muted); font-size: 14px; transition: transform 0.25s; }
   .sites-chevron.open { transform: rotate(180deg); }
-
   .sites-body { display: none; padding: 20px 28px 24px; }
   .sites-body.open { display: block; }
-
   .sites-search {
     width: 100%; background: var(--surface2); border: 1px solid var(--border);
     border-radius: 7px; color: var(--text); font-family: var(--mono); font-size: 12px;
@@ -275,18 +346,13 @@
   }
   .sites-search:focus { border-color: var(--accent); }
   .sites-search::placeholder { color: var(--muted); }
-
   .sites-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
-    gap: 6px;
-    max-height: 320px;
-    overflow-y: auto;
-    padding-right: 4px;
+    gap: 6px; max-height: 320px; overflow-y: auto; padding-right: 4px;
   }
   .sites-grid::-webkit-scrollbar { width: 4px; }
   .sites-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
   .site-chip {
     font-family: var(--mono); font-size: 11px; color: var(--muted);
     background: var(--surface2); border: 1px solid var(--border);
@@ -295,7 +361,6 @@
     transition: color 0.15s, border-color 0.15s;
   }
   .site-chip:hover { color: var(--text); border-color: var(--muted); }
-
   .no-results { font-family: var(--mono); font-size: 12px; color: var(--muted); padding: 12px 0; display: none; }
 
   @keyframes fadeDown { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:translateY(0)} }
@@ -382,27 +447,21 @@
   </div>
 
   <button class="btn btn-primary" id="dl-btn" onclick="startDownload()">
-    ▶ Download
+    ▶ Add to Queue
   </button>
 
-  <!-- Progress -->
-  <div id="progress-section">
-    <div class="info-bar" id="info-bar"></div>
-    <div class="status-row">
-      <span id="status-text">—</span>
-      <span id="speed-text"></span>
-    </div>
-    <div class="track"><div class="bar" id="bar"></div></div>
-    <div id="percent-text">0%</div>
+</div>
 
-    <div class="dl-ready" id="dl-ready">
-      <p id="dl-ready-msg">✓ Ready to save</p>
-      <a class="btn-dl" id="dl-link" href="#" download>⬇ Save to Device</a>
+<!-- ── Download Queue ── -->
+<div id="queue-section">
+  <div class="queue-header">
+    <div class="queue-title">
+      Downloads
+      <span class="queue-badge" id="queue-badge">0</span>
     </div>
-    <div class="done-banner" id="done-banner">✓ Saved to server folder.</div>
-    <div class="error-banner" id="error-banner"></div>
+    <button class="queue-clear" onclick="clearFinished()">Clear finished</button>
   </div>
-
+  <div class="queue-list" id="queue-list"></div>
 </div>
 
 <!-- Supported sites collapsible -->
@@ -444,6 +503,9 @@ let currentFormat = 'mp3';
 let currentDest   = 'device';
 let currentModalPath = '';
 let selectedDir = document.getElementById('dir-display').value;
+
+// job_id -> { el, barEl, pctEl, statusEl, speedEl, infoEl, titleEl, badgeEl, actionsEl, state }
+const jobMap = {};
 
 function setFormat(f) {
   currentFormat = f;
@@ -506,20 +568,150 @@ function selectCurrentFolder() {
   closeModal();
 }
 
+// ── Queue helpers ─────────────────────────────────────────────────────────────
+function updateQueueSection() {
+  const count = Object.keys(jobMap).length;
+  document.getElementById('queue-section').style.display = count > 0 ? 'block' : 'none';
+  document.getElementById('queue-badge').textContent = count;
+}
+
+function createJobCard(job_id, url, fmt) {
+  const card = document.createElement('div');
+  card.className = 'job-card active';
+  card.id = `job-${job_id}`;
+  card.innerHTML = `
+    <div class="job-top">
+      <div class="job-meta">
+        <div class="job-url">${esc(url)}</div>
+        <div class="job-title placeholder" id="job-title-${job_id}">Fetching info…</div>
+      </div>
+      <span class="job-badge badge-active" id="job-badge-${job_id}">Active</span>
+    </div>
+    <div class="job-info-bar" id="job-info-${job_id}"></div>
+    <div class="job-progress">
+      <div class="job-status-row">
+        <span class="job-status" id="job-status-${job_id}">Starting…</span>
+        <span class="job-speed"  id="job-speed-${job_id}"></span>
+      </div>
+      <div class="job-track"><div class="job-bar" id="job-bar-${job_id}"></div></div>
+      <div class="job-pct" id="job-pct-${job_id}">0%</div>
+    </div>
+    <div class="job-actions" id="job-actions-${job_id}" style="display:none"></div>
+  `;
+
+  document.getElementById('queue-list').prepend(card);
+
+  jobMap[job_id] = {
+    el:        card,
+    barEl:     card.querySelector(`#job-bar-${job_id}`),
+    pctEl:     card.querySelector(`#job-pct-${job_id}`),
+    statusEl:  card.querySelector(`#job-status-${job_id}`),
+    speedEl:   card.querySelector(`#job-speed-${job_id}`),
+    infoEl:    card.querySelector(`#job-info-${job_id}`),
+    titleEl:   card.querySelector(`#job-title-${job_id}`),
+    badgeEl:   card.querySelector(`#job-badge-${job_id}`),
+    actionsEl: card.querySelector(`#job-actions-${job_id}`),
+    state: 'active',
+    fmt,
+  };
+  updateQueueSection();
+}
+
+function setJobProgress(job_id, pct, status, speed, eta) {
+  const j = jobMap[job_id];
+  if (!j) return;
+  j.barEl.style.width = pct + '%';
+  j.pctEl.textContent = Math.round(pct) + '%';
+  j.statusEl.textContent = status;
+  j.speedEl.textContent = speed ? `${speed}${eta ? ' · ETA ' + eta : ''}` : '';
+}
+
+function markJobDone(job_id, browserDownload, fetchJobId) {
+  const j = jobMap[job_id];
+  if (!j) return;
+  j.state = 'done';
+  j.el.classList.remove('active');
+  j.el.classList.add('done');
+  j.badgeEl.className = 'job-badge badge-done';
+  j.badgeEl.textContent = 'Done';
+  j.actionsEl.style.display = 'flex';
+
+  if (browserDownload) {
+    const a = document.createElement('a');
+    a.className = 'btn-dl-sm';
+    a.href = `/api/fetch/${fetchJobId}`;
+    a.download = '';
+    a.innerHTML = '⬇ Save File';
+    j.actionsEl.appendChild(a);
+  } else {
+    const span = document.createElement('span');
+    span.style.cssText = 'font-family:var(--mono);font-size:11px;color:var(--success)';
+    span.textContent = '✓ Saved to server';
+    j.actionsEl.appendChild(span);
+  }
+
+  const dismiss = document.createElement('button');
+  dismiss.className = 'job-dismiss';
+  dismiss.textContent = 'Dismiss';
+  dismiss.onclick = () => removeJob(job_id);
+  j.actionsEl.appendChild(dismiss);
+}
+
+function markJobError(job_id, msg) {
+  const j = jobMap[job_id];
+  if (!j) return;
+  j.state = 'errored';
+  j.el.classList.remove('active');
+  j.el.classList.add('errored');
+  j.badgeEl.className = 'job-badge badge-error';
+  j.badgeEl.textContent = 'Error';
+
+  const errDiv = document.createElement('div');
+  errDiv.className = 'job-error-msg';
+  errDiv.textContent = '⚠ ' + msg;
+  j.el.appendChild(errDiv);
+
+  j.actionsEl.style.display = 'flex';
+  const dismiss = document.createElement('button');
+  dismiss.className = 'job-dismiss';
+  dismiss.textContent = 'Dismiss';
+  dismiss.onclick = () => removeJob(job_id);
+  j.actionsEl.appendChild(dismiss);
+}
+
+function removeJob(job_id) {
+  const j = jobMap[job_id];
+  if (!j) return;
+  j.el.style.opacity = '0';
+  j.el.style.maxHeight = j.el.offsetHeight + 'px';
+  requestAnimationFrame(() => {
+    j.el.style.maxHeight = '0';
+    j.el.style.padding = '0';
+    j.el.style.margin = '0';
+    j.el.style.border = 'none';
+  });
+  setTimeout(() => {
+    j.el.remove();
+    delete jobMap[job_id];
+    updateQueueSection();
+  }, 320);
+}
+
+function clearFinished() {
+  Object.keys(jobMap).forEach(id => {
+    if (jobMap[id].state !== 'active') removeJob(id);
+  });
+}
+
 // ── Download ──────────────────────────────────────────────────────────────────
 async function startDownload() {
-  const url = document.getElementById('url-input').value.trim();
-  if (!url) { document.getElementById('url-input').focus(); return; }
+  const input = document.getElementById('url-input');
+  const url = input.value.trim();
+  if (!url) { input.focus(); return; }
 
-  const btn = document.getElementById('dl-btn');
-  btn.disabled = true;
-
-  document.getElementById('progress-section').style.display = 'block';
-  document.getElementById('info-bar').style.display = 'none';
-  document.getElementById('dl-ready').style.display = 'none';
-  document.getElementById('done-banner').style.display = 'none';
-  document.getElementById('error-banner').style.display = 'none';
-  setProgress(0, 'Starting…', '', '');
+  // Clear input immediately so the user can paste the next link right away
+  input.value = '';
+  input.focus();
 
   const body = {
     url,
@@ -530,12 +722,21 @@ async function startDownload() {
     directory: currentDest === 'server' ? selectedDir : undefined,
   };
 
-  const res = await fetch('/api/download', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(body),
-  });
-  const { job_id, error } = await res.json();
-  if (error) { showError(error); btn.disabled = false; return; }
+  let job_id;
+  try {
+    const res = await fetch('/api/download', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (data.error) { showToast('⚠ ' + data.error); return; }
+    job_id = data.job_id;
+  } catch (e) {
+    showToast('⚠ Network error — could not reach server');
+    return;
+  }
+
+  createJobCard(job_id, url, currentFormat);
 
   const evtSource = new EventSource(`/api/progress/${job_id}`);
   evtSource.onmessage = (e) => {
@@ -543,51 +744,58 @@ async function startDownload() {
     if (msg.event === 'ping') return;
 
     if (msg.event === 'info') {
-      const bar = document.getElementById('info-bar');
-      bar.style.display = 'block';
-      bar.innerHTML = `<strong>${esc(msg.data.title)}</strong>` +
-        (msg.data.is_playlist ? ` · <span style="color:var(--accent)">${msg.data.count} items</span>` : '');
+      const j = jobMap[job_id];
+      if (j) {
+        j.titleEl.textContent = msg.data.title;
+        j.titleEl.classList.remove('placeholder');
+        if (msg.data.is_playlist) {
+          j.infoEl.style.display = 'block';
+          j.infoEl.innerHTML = `<strong>${esc(msg.data.title)}</strong> · <span style="color:var(--accent)">${msg.data.count} items</span>`;
+        }
+      }
     }
 
     if (msg.event === 'progress') {
       const d = msg.data;
-      setProgress(d.percent, d.status, d.speed, d.eta);
+      setJobProgress(job_id, d.percent, d.status, d.speed, d.eta);
     }
 
     if (msg.event === 'done') {
-      setProgress(100, msg.data.status, '', '');
-      if (msg.data.browser_download) {
-        document.getElementById('dl-link').href = `/api/fetch/${msg.data.job_id}`;
-        document.getElementById('dl-ready-msg').textContent =
-          currentFormat === 'mp4' ? '✓ Download complete — ready to save' : '✓ Conversion complete — ready to save';
-        document.getElementById('dl-ready').style.display = 'block';
-      } else {
-        document.getElementById('done-banner').style.display = 'block';
-      }
-      evtSource.close(); btn.disabled = false;
+      setJobProgress(job_id, 100, msg.data.status, '', '');
+      markJobDone(job_id, msg.data.browser_download, msg.data.job_id);
+      evtSource.close();
     }
 
-    if (msg.event === 'error') { showError(msg.data.message); evtSource.close(); btn.disabled = false; }
-    if (msg.event === 'end') { evtSource.close(); btn.disabled = false; }
+    if (msg.event === 'error') {
+      markJobError(job_id, msg.data.message);
+      evtSource.close();
+    }
+
+    if (msg.event === 'end') evtSource.close();
   };
-  evtSource.onerror = () => { evtSource.close(); btn.disabled = false; };
+  evtSource.onerror = () => {
+    markJobError(job_id, 'Lost connection to server.');
+    evtSource.close();
+  };
 }
 
-function setProgress(pct, status, speed, eta) {
-  document.getElementById('bar').style.width = pct + '%';
-  document.getElementById('percent-text').textContent = Math.round(pct) + '%';
-  document.getElementById('status-text').textContent = status;
-  document.getElementById('speed-text').textContent = speed ? `${speed}${eta ? ' · ETA ' + eta : ''}` : '';
-}
-
-function showError(msg) {
-  const el = document.getElementById('error-banner');
-  el.textContent = '⚠ ' + msg;
-  el.style.display = 'block';
+// Non-blocking toast for startup errors
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  Object.assign(t.style, {
+    position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
+    background: 'rgba(255,60,60,0.12)', border: '1px solid rgba(255,60,60,0.3)',
+    color: 'var(--accent)', fontFamily: 'var(--mono)', fontSize: '12px',
+    padding: '12px 20px', borderRadius: '8px', zIndex: '1000',
+    transition: 'opacity 0.4s', whiteSpace: 'nowrap',
+  });
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 4000);
 }
 
 function esc(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 document.getElementById('url-input').addEventListener('keydown', e => {

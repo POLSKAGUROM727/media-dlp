@@ -1,6 +1,7 @@
-# Media Downloader  ·  Self-Hosted on Unraid
+# YT → MP3  ·  Self-Hosted on Unraid
 
-A locally-hosted media downloader. Paste any supported link, choose MP3 or MP4, pick a quality, and download. Supports single videos and full playlists. Works with 1000+ sites via yt-dlp.
+A locally-hosted YouTube to MP3 converter. Paste a URL, pick a folder, download.
+Supports single videos and full playlists. Embeds 320kbps audio, album art, and ID3 tags.
 
 ---
 
@@ -9,13 +10,14 @@ A locally-hosted media downloader. Paste any supported link, choose MP3 or MP4, 
 ### 1. Copy files to your Unraid server
 
 ```bash
-mkdir -p /mnt/user/appdata/media-dl
-# Copy the contents of this folder to /mnt/user/appdata/media-dl
+# On your Unraid terminal (or SSH in):
+mkdir -p /mnt/user/appdata/yt2mp3
+# Copy the contents of this folder to /mnt/user/appdata/yt2mp3
 ```
 
 ### 2. Edit docker-compose.yml
 
-Open `docker-compose.yml` and change the volume mount to point to your share:
+Open `docker-compose.yml` and change the volume mount to point to your music share:
 
 ```yaml
 volumes:
@@ -27,7 +29,7 @@ Change the port `7474` if it conflicts with another container.
 ### 3. Build and start
 
 ```bash
-cd /mnt/user/appdata/media-dl
+cd /mnt/user/appdata/yt2mp3
 docker compose up -d --build
 ```
 
@@ -39,41 +41,13 @@ http://YOUR_UNRAID_IP:7474
 
 ---
 
-## Manual Docker Commands
-
-```bash
-docker build -t media-dl /mnt/user/appdata/media-dl
-
-docker run -d \
-  --name media-dl \
-  --restart unless-stopped \
-  -p 7474:5000 \
-  -v /mnt/user/media/Music:/downloads \
-  -e DOWNLOAD_DIR=/downloads \
-  media-dl
-```
-
-### Rebuild after updating files
-
-```bash
-docker rm -f media-dl
-docker build --no-cache -t media-dl /mnt/user/appdata/media-dl
-docker run -d \
-  --name media-dl \
-  --restart unless-stopped \
-  -p 7474:5000 \
-  -v /mnt/user/media/Music:/downloads \
-  -e DOWNLOAD_DIR=/downloads \
-  media-dl
-```
-
----
-
 ## Adding via Unraid's Docker UI (no Compose)
+
+If you prefer Unraid's built-in Docker template UI instead of Compose:
 
 1. Go to **Docker** tab → **Add Container**
 2. Fill in:
-   - **Name**: `media-dl`
+   - **Repository**: build from local path (or push to Docker Hub first)
    - **Port**: `7474` → `5000`
    - **Volume Path (Container)**: `/downloads`
    - **Volume Path (Host)**: your share, e.g. `/mnt/user/media/Music`
@@ -84,17 +58,16 @@ docker run -d \
 
 ## Keeping yt-dlp updated
 
-Sites change frequently. Update yt-dlp inside the running container:
+YouTube changes frequently. Update yt-dlp inside the container:
 
 ```bash
-docker exec media-dl pip install -U yt-dlp
+docker exec yt2mp3 pip install -U yt-dlp
 ```
 
-Or do a full rebuild:
+Or rebuild the image periodically:
 
 ```bash
-docker rm -f media-dl
-docker build --no-cache -t media-dl /mnt/user/appdata/media-dl
+docker compose build --no-cache && docker compose up -d
 ```
 
 ---
@@ -111,12 +84,10 @@ user: "99:100"   # nobody:users — Unraid's default unprivileged user
 
 ## Features
 
-- ✅ 1000+ supported sites via yt-dlp
-- ✅ MP3 (audio) and MP4 (video) output
-- ✅ Selectable quality — MP3: 64–320 kbps · MP4: 240p–4K
-- ✅ Single videos and full playlists (zipped for download)
-- ✅ Embedded album art and ID3 tags (MP3)
+- ✅ Single videos and full playlists
+- ✅ 320kbps MP3
+- ✅ Embedded album art (video thumbnail)
+- ✅ ID3 tags: title, artist (channel name), year
 - ✅ Real-time progress bar with speed + ETA
-- ✅ Save to device (browser download) or directly to a server folder
 - ✅ Server-side folder browser — pick any subfolder in your share
 - ✅ No data leaves your server
